@@ -3,6 +3,8 @@ from bs4 import BeautifulSoup
 from pathlib import Path
 from dotenv import load_dotenv
 import os
+import re
+import json
 
 load_dotenv()
 
@@ -18,13 +20,6 @@ concerts_url = os.getenv("CONCERTS_URL")
 
 # Load directories
 data_base_path = os.getenv("DATA_BASE_PATH")
-data_concerts_path = os.getenv("DATA_CONCERTS_PATH")
-
-# Delete all files in the 'data/' directory
-data_directory = Path(data_concerts_path)
-for file in data_directory.iterdir():
-    if file.is_file():
-        file.unlink()
 
 # Initialize session
 with requests.Session() as session:
@@ -58,8 +53,9 @@ with requests.Session() as session:
                 links[anchor.text.strip()] = base_url + anchor['href']
 
         number_of_concerts = len(links)
-        print(f"Found {number_of_concerts} upcoming concerts.")
-
+        print(f"Found {number_of_concerts} upcoming concerts. Starting gathering info about each of them...")
+        concert_data = {}
+        
         # Iterate over each link and access the page
         for index, (concert_name, concert_url) in enumerate(links.items(), start=1):
             # Calculate and display progress
@@ -80,9 +76,23 @@ with requests.Session() as session:
                                 results_soup = BeautifulSoup(poll_response.text, 'html.parser')
                                 can_play_users = [a.text for a in results_soup.select('tr:nth-of-type(2) td:nth-of-type(2) a')]
                                 cannot_play_users = [a.text for a in results_soup.select('tr:nth-of-type(3) td:nth-of-type(2) a')]
-                                with open(f"{data_concerts_path}/{concert_name}", "w", encoding="utf-8") as file:
-                                    for user in can_play_users:
-                                        file.write(f"{user}\n")
+
+                                # Regular expression to match the id from url
+                                match_id = re.search(r"tid=(\d+)", concert_url)
+                                concert_id = match_id.group(1)
+
+                                # Regular expression to match the date format
+                                # match_date = re.match(r"(\d{4}\.\d{2}\.\d{2})", concert_name)
+                                match = re.match(r"^(\d{4}\.\d{2}\.\d{2})\s(.+)$", concert_name)
+                                concert_date = match.group(1)
+                                short_name = match.group(2)
+                                concert_data[str(concert_id)] = {
+                                    'name': concert_name,
+                                    'shortname': short_name,
+                                    'date': concert_date,
+                                    'can_play_users': can_play_users,
+                                    'cannot_play_users': cannot_play_users
+                                }
                             else:
                                 print(f"Failed to access poll results page: {poll_link}, Status Code: {poll_response.status_code}")
                         except requests.exceptions.RequestException as e:
@@ -93,6 +103,10 @@ with requests.Session() as session:
                     print(f"Failed to access {concert_name}: {concert_url}, Status Code: {response.status_code}")
             except requests.exceptions.RequestException as e:
                 print(f"Error accessing {concert_url}: {e}")
+
+        # Save data into .json file
+        with open(f"{data_base_path}/concerts.json", "w", encoding="utf-8") as file:
+            json.dump(concert_data, file, indent=4, ensure_ascii=False)
     else:
         "Login failed"
 

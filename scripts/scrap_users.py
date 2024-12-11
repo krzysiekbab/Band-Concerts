@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 import os
 from bs4 import BeautifulSoup
 import csv
-
+import json
 
 load_dotenv()
 
@@ -45,11 +45,10 @@ with requests.Session() as session:
     form_data["password"] = password
 
     # Login
+    # TODO: Fix checks to use HTTP CODES
     login_response = session.post(login_url, data=form_data)
-    if "Logowanie nieudane" in login_response.text:
-        print("Nie udało się zalogować.")
-    else:
-        print("Zalogowano pomyślnie.")
+    if login_response.status_code == 200:
+        print("Logged succesfully")
 
         # Move to users page
         users_response = session.get(users_url)
@@ -60,51 +59,49 @@ with requests.Session() as session:
         user_links = [link['href'] for link in links if 'uid=' in link['href']]
 
         print(f"Found {len(user_links)} users. Starting gathering info about each of them...")
-
-        users_data = []
-
+        users_data = {}
+        
+        # Iterate over each link and access the page
         for index, user_link in enumerate(user_links):
-            user_response = session.get(user_link)
-            user_soup = BeautifulSoup(user_response.text, 'html.parser')
+            try:
+                user_response = session.get(user_link)
+                if user_response.status_code == 200:
+                    user_soup = BeautifulSoup(user_response.text, 'html.parser')
 
-            # Gather user data
-            user_id = user_link.split('uid=')[1]
-            imie = user_soup.find("td", class_="trow1 scaleimages")
-            nazwisko = user_soup.find("td", class_="trow2 scaleimages")
-            nick_container = user_soup.find('span', class_='largetext').find('strong')
-            nick = nick_container.find('span') if nick_container else None
+                    # Gather user data
+                    user_id = user_link.split('uid=')[1]
+                    imie = user_soup.find("td", class_="trow1 scaleimages")
+                    nazwisko = user_soup.find("td", class_="trow2 scaleimages")
+                    nick_container = user_soup.find('span', class_='largetext').find('strong')
+                    nick = nick_container.find('span') if nick_container else None
 
-            if not nick:
-                nick = nick_container
+                    if not nick:
+                        nick = nick_container
 
-            if user_id and imie and nazwisko and nick:
-                name = imie.get_text(strip=True)
-                surname = nazwisko.get_text(strip=True)
-                nick = nick.get_text(strip=True)
-                full_name = f"{surname} {name}"
-                instrument = data_dict.get(full_name)
+                    if user_id and imie and nazwisko and nick:
+                        name = imie.get_text(strip=True)
+                        surname = nazwisko.get_text(strip=True)
+                        nick = nick.get_text(strip=True)
+                        full_name = f"{surname} {name}"
+                        instrument = data_dict.get(full_name)
+                        users_data[str(user_id)] = {
+                            'name': name,
+                            'surname': surname,
+                            'nick': nick,
+                            'instrument': instrument
+                        }
 
-                user_data = {
-                    'id': user_id,
-                    'name': name,
-                    'surname': surname,
-                    'nick': nick,
-                    'instrument': instrument
-                }
-                users_data.append(user_data)
-
-            progress = (index + 1) / len(user_links) * 100
-            print(f"Progress: {progress:.2f}% - Gathered {index + 1}/{len(user_links)} users", end='\r')
+                    progress = (index + 1) / len(user_links) * 100
+                    print(f"Progress: {progress:.2f}% - Gathered {index + 1}/{len(user_links)} users", end='\r')
+                else:
+                    print(f"Failed to access {user_link}, Status Code: {user_response.status_code}")
+            except requests.exceptions.RequestException as e:
+                print(f"Error accessing {user_link}: {e}")
 
         print("\nGathering data finished.")
 
-        # Save data into .txt file
-        filename = f"{data_base_path}/scrapped_users.txt"
-        with open(f"{filename}", "w", encoding="utf-8") as file:
-            for user in users_data:
-                file.write(f"'{user['nick']}': {{'id': {user['id']}, 'name': '{user['name']}', 'surname': '{user['surname']}', 'instrument': '{user['instrument']}'}}\n")
-        
-        print(f"Saved users data to {filename}")
-
-
-        
+        # Save data into .json file
+        with open(f"{data_base_path}/users.json", "w", encoding="utf-8") as file:
+            json.dump(users_data, file, indent=4, ensure_ascii=False)
+    else:
+        print("Login failed")
