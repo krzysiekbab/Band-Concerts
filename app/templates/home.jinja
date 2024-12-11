@@ -1,0 +1,14 @@
+{% extends "base.jinja" %}
+{% block title %}Home{% endblock %}
+{% block content%}
+    <h1 class="mb-4">Nadchodzące koncerty</h1>
+    {% for concert in concerts%}
+        <div class="card mb-3 bg-light">
+            <div class="card-body">
+                <a class="card-title h5 text-dark m-0" href="/concerts/{{concert.id}}">
+                    {{concert.name}}
+                </a>
+            </div>
+        </div>
+    {% endfor %}
+{% endblock %}

@@ -1,0 +1,66 @@
+{% extends "base.jinja" %}
+{% block title %}
+    {{concert.shortname}}
+{% endblock %}
+{% block content%}
+    <h1 class="mb-4">Skład na {{concert.shortname}}</h1>
+    <div class="d-flex justify-content-between">
+        <h4 class="mb-4">Data: {{concert.date.strftime('%Y-%m-%d')}}</h4>
+        <h4 class="mb-4">Łącznie: {{musicians|length}}</h4>
+    </div>
+    <div class="container">
+        <div class="row">
+            <div class="col-6 col-md-3 col-lg-2 mb-5">
+                <h4 class="bg-light border-bottom">Flety</h4>
+                {% with section=sections["Flet"] %}{% include "section.jinja" %}{% endwith %}
+            </div>
+            <div class="col-6 col-md-3 col-lg-2 mb-5">
+                <h4 class="bg-light border-bottom">Oboje</h4>
+                {% with section=sections["Obój"] %}{% include "section.jinja" %}{% endwith %}
+            </div>
+            <div class="col-6 col-md-3 col-lg-2 mb-5">
+                <h4 class="bg-light border-bottom">Klarnety</h4>
+                {% with section=sections["Klarnet"] %}{% include "section.jinja" %}{% endwith %}
+            </div>
+            <div class="col-6 col-md-3 col-lg-2 mb-5">
+                <h4 class="bg-light border-bottom">Saksofony</h4>
+                {% with section=sections["Saksofon"] %}{% include "section.jinja" %}{% endwith %}
+            </div>
+            <div class="col-6 col-md-3 col-lg-2 mb-5">
+                <h4 class="bg-light border-bottom">Waltornie</h4>
+                {% with section=sections["Waltornia"] %}{% include "section.jinja" %}{% endwith %}
+            </div>
+            <div class="col-6 col-md-3 col-lg-2 mb-5">
+                <h4 class="bg-light border-bottom">Eufonia</h4>
+                {% with section=sections["Eufonium"] %}{% include "section.jinja" %}{% endwith %}
+            </div>
+            <div class="col-6 col-md-3 col-lg-2 mb-5">
+                <h4 class="bg-light border-bottom">Trąbki</h4>
+                {% with section=sections["Trąbka"] %}{% include "section.jinja" %}{% endwith %}
+            </div>
+            <div class="col-6 col-md-3 col-lg-2 mb-5">
+                <h4 class="bg-light border-bottom">Puzony</h4>
+                {% with section=sections["Puzon"] %}{% include "section.jinja" %}{% endwith %}
+            </div>
+            <div class="col-6 col-md-3 col-lg-2 mb-5">
+                <h4 class="bg-light border-bottom">Tuby</h4>
+                {% with section=sections["Tuba"] %}{% include "section.jinja" %}{% endwith %}
+            </div>
+            <div class="col-6 col-md-3 col-lg-2 mb-5">
+                <h4 class="bg-light border-bottom">Gitary</h4>
+                {% with section=sections["Gitara"] %}{% include "section.jinja" %}{% endwith %}
+            </div>
+            <div class="col-6 col-md-3 col-lg-2 mb-5">
+                <h4 class="bg-light border-bottom">Perkusja</h4>
+                {% with section=sections["Perkusja"] %}{% include "section.jinja" %}{% endwith %}
+            </div>
+            {# {% if sections["Inne"]|length != 0 %} #}
+                <div class="col-6 col-md-3 col-lg-2 mb-5">
+                    <h4 class="bg-light border-bottom">Inne</h4>
+                    {% with section=sections["Inne"] %}{% include "section.jinja" %}{% endwith %}
+                </div>
+            {# {% endif %} #}
+        </div>
+    </div>
+{% endblock %}
+

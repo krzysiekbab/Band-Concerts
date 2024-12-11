@@ -1,3 +1,6 @@
 website/__pycache__
 instance
+data
+__pycache__
 .venv
+.env
