@@ -1,27 +1,85 @@
 from .. import db
 from app.models import Musician
 from typing import List, Dict
+from flask import Flask
+import json
 
+def add_musicians_to_database(app: Flask) -> None:
+    """
+    Add forum musicians to database
+    """
+    with app.app_context():
+        musicians_data = load_musicians_data()
+        for _, musician in musicians_data.items():
+            add_musician_to_database(musician)
 
-def add_musician_to_database(user_data):
+def add_musician_to_database(musician_data: Dict) -> None:
     """
-    Add musician to database only if not added already
+    Add musician to database
     """
-    from app.models import Musician
-    existing_musician = Musician.query.filter_by(id=user_data['id']).first()
-    if existing_musician is None:
-        new_musician = Musician(
-            id=user_data['id'],
-            name=user_data['name'],
-            surname=user_data['surname'],
-            nick=user_data['nick'],
-            instrument=user_data.get('instrument')
+    if musician_exists_in_database(musician_data['id']) == False:
+        musician = Musician(
+            id=musician_data['id'],
+            name=musician_data['name'],
+            surname=musician_data['surname'],
+            nick=musician_data['nick'],
+            instrument=musician_data.get('instrument')
         )
-        db.session.add(new_musician)
+        db.session.add(musician)
         db.session.commit()
-        print(f"{user_data['name']} {user_data['surname']} added to database")
+        
+        print(f"{musician_data['name']} {musician_data['surname']} added to database")
 
+def remove_musician_from_database(musician: Musician) -> None:
+    """
+    Remove musician from database
+    """
+    full_name = f"{musician.name} {musician.surname}"
+    db.session.delete(musician)
+    db.session.commit()
+
+    print(f"{full_name} removed from database")
+
+def update_musician_database() -> None:
+    """
+    Update musician database based on scrapped musicians data
+    """
+    from run import app
+
+    musicians_data = load_musicians_data()
+    with app.app_context():
+        # Remove musician, who is not present anymore in scrapepd musicians data
+        musicians: List[Musician] = Musician.query.all()
+        for musician in musicians:
+            if str(musician.id) not in musicians_data.keys():
+                remove_musician_from_database(musician)
+
+        # Add new musicians
+        for _, musician in musicians_data.items():
+            if musician_exists_in_database(musician['id']) == False:
+                add_musician_to_database(musician)
+
+
+def musician_exists_in_database(musician_id: int) -> bool:
+    """
+    Check if a musician with the given ID exists in the database.
+    """
+    return Musician.query.filter_by(id=musician_id).first() is not None
+
+
+def load_musicians_data() -> Dict:
+    """
+    Load scrapped musician data
+    """
+    with open('data/musicians.json', 'r') as file:
+        musicians_data = json.load(file)
+
+        return musicians_data
+    
 def divide_musicians_into_instrument_sections(musicians: List[Musician]) -> Dict:
+    """
+    Divide musicians into instrument sections to have them easy displayed on concert page
+    """
     sections = {}
     for musician in musicians:
         instrument = musician.instrument
