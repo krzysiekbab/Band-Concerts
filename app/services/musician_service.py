@@ -3,6 +3,8 @@ from app.models import Musician
 from typing import List, Dict
 from flask import Flask
 import json
+from app import get_project_base_path
+import os
 
 def add_musicians_to_database(app: Flask) -> None:
     """
@@ -28,13 +30,13 @@ def add_musician_to_database(musician_data: Dict) -> None:
         db.session.add(musician)
         db.session.commit()
         
-        print(f"{musician_data['name']} {musician_data['surname']} added to database")
+        print(f"{musician.get_fullname()} added to database")
 
 def remove_musician_from_database(musician: Musician) -> None:
     """
     Remove musician from database
     """
-    full_name = f"{musician.name} {musician.surname}"
+    full_name = musician.get_fullname()
     db.session.delete(musician)
     db.session.commit()
 
@@ -66,16 +68,6 @@ def musician_exists_in_database(musician_id: int) -> bool:
     """
     return Musician.query.filter_by(id=musician_id).first() is not None
 
-
-def load_musicians_data() -> Dict:
-    """
-    Load scrapped musician data
-    """
-    with open('data/musicians.json', 'r') as file:
-        musicians_data = json.load(file)
-
-        return musicians_data
-    
 def divide_musicians_into_instrument_sections(musicians: List[Musician]) -> Dict:
     """
     Divide musicians into instrument sections to have them easy displayed on concert page
@@ -91,3 +83,14 @@ def divide_musicians_into_instrument_sections(musicians: List[Musician]) -> Dict
             sections[instrument] = [musician]
     
     return sections
+
+def load_musicians_data() -> Dict:
+    """
+    Load scrapped musician data
+    """
+    musicians_file_path = os.path.join(get_project_base_path(), 'data', 'musicians.json')
+    with open(musicians_file_path, 'r', encoding='utf-8') as file:
+        musicians_data = json.load(file)
+
+        return musicians_data
+    

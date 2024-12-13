@@ -13,12 +13,3 @@ class Concert(db.Model):
     # Define the many-to-many relationship with Musician
     musicians = relationship('Musician', secondary=concert_musician_association, back_populates='concerts')
 
-    def remove_musician(self, musician):
-        """Remove a musician from the concert."""
-        if musician in self.musicians:
-            self.musicians.remove(musician)
-        else:
-            raise ValueError(f"Musician {musician.name} {musician.surname} is not part of this concert.")
-
-
-

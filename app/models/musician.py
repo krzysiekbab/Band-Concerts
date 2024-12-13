@@ -14,6 +14,8 @@ class Musician(db.Model):
     # Define the many-to-many relationship with Concert
     concerts = relationship('Concert', secondary=concert_musician_association, back_populates='musicians')
 
+    def get_fullname(self):
+        return f'{self.name} {self.surname}'
     
     def __repr__(self):
         return f'<User {self.name} {self.surname}, {self.nick}, {self.instrument}>' 

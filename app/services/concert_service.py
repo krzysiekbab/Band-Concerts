@@ -4,6 +4,8 @@ from datetime import datetime
 import json
 from typing import List, Dict
 from flask import Flask
+from app import get_project_base_path
+import os
 
 def add_concerts_to_database(app: Flask) -> None:
     """
@@ -57,7 +59,7 @@ def add_musician_to_concert(musician: Musician, concert: Concert) -> None:
     """
     concert.musicians.append(musician)
     db.session.commit()
-    print(f"{musician.name} {musician.surname} added to concert {concert.name}.")
+    print(f"{musician.get_fullname} added to concert {concert.name}.")
 
 def remove_musician_from_concert(musician: Musician, concert: Concert) -> None:
     """
@@ -65,7 +67,7 @@ def remove_musician_from_concert(musician: Musician, concert: Concert) -> None:
     """
     concert.musicians.remove(musician)
     db.session.commit()
-    print(f"{musician.name} {musician.surname} has been removed from the concert {concert.name}.")
+    print(f"{musician.get_fullname} has been removed from the concert {concert.name}.")
 
 def is_musician_already_added_to_concert(musician: Musician, concert: Concert) -> bool:
     """
@@ -122,7 +124,8 @@ def load_concerts_data() -> Dict:
     """
     Load scrapped concert data
     """
-    with open('data/concerts.json', 'r') as file:
+    concerts_file_path = os.path.join(get_project_base_path(), 'data', 'concerts.json')
+    with open(concerts_file_path, 'r', encoding='utf-8') as file:
         concerts_data = json.load(file)
 
         return concerts_data

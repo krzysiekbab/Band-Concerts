@@ -1,6 +1,6 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from os import path
+import os
 from flask_login import LoginManager
 
 db = SQLAlchemy()
@@ -52,8 +52,10 @@ def database_exists() -> bool:
     """
     Check if database file exists
     """
-    return path.exists('instance/' + DB_NAME)
+    return os.path.exists('instance/' + DB_NAME)
 
+def get_project_base_path() -> str:
+    return os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
             
 
     
