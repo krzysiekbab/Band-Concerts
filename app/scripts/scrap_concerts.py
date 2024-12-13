@@ -90,7 +90,8 @@ def scrap_concerts():
                                         'shortname': short_name,
                                         'date': concert_date,
                                         'can_play_users': can_play_users,
-                                        'cannot_play_users': cannot_play_users
+                                        'cannot_play_users': cannot_play_users,
+                                        'url': concert_url
                                     }
                                     # Calculate and display progress
                                     progress = (index / number_of_concerts) * 100

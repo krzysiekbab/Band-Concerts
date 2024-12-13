@@ -26,6 +26,7 @@ def add_concert_to_database(concert_data: Dict) -> None:
             name=concert_data['name'],
             shortname=concert_data['shortname'],
             date=datetime.strptime(concert_data['date'], "%Y.%m.%d"),
+            url=concert_data['url']
         )
         add_musicians_to_concert(concert_data, concert)
 
@@ -135,7 +136,7 @@ def get_concerts_modified_time():
     Get the last modified time of a concerts.json.
 
     Returns:
-        str: Last modified time in 'YYYY-MM-DD HH:MM:SS' format, or an error message.
+        str: Last modified time in 'YYYY-MM-DD HH:MM' format, or an error message.
     """
     concerts_file_path = os.path.join(get_project_base_path(), 'data', 'concerts.json')
 

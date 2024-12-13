@@ -1,30 +1,30 @@
 {% extends "base.jinja" %}
 
-{% block title %}Login{% endblock %} 
+{% block title %}Logowanie{% endblock %} 
 
 {% block content%}
     <form method="POST">
-      <h3 align="center">Login</h3>
+      <h3 align="center">Logowanie</h3>
       <div class="form-group">
-        <label for="email">Email Address</label>
+        <label for="email">Adres email</label>
         <input
           type="text"
           id="email"
           name="email"
-          class="form-control"
-          placeholder="Enter Email"
+          class="form-control mb-3"
+          placeholder="Podaj email"
         />
-        <label for="password">Password</label>
+        <label for="password">Hasło</label>
         <input
           type="password"
           id="password"
           name="password"
           class="form-control"
-          placeholder="Enter Password"
+          placeholder="Podaj hasło"
         />
         <br />
         <div align="center">
-          <button class="btn btn-primary" type="submit">Login</button>
+          <button class="btn btn-primary" type="submit">Zaloguj</button>
         </div>
       </div>
     </form>
