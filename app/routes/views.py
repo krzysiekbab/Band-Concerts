@@ -3,6 +3,7 @@ from flask_login import login_required, current_user
 from app.models import Musician, Concert
 from typing import List
 from app.services.musician_service import divide_musicians_into_instrument_sections
+from app.services.concert_service import get_concerts_modified_time
 
 views = Blueprint("views", __name__)
 
@@ -12,8 +13,9 @@ views = Blueprint("views", __name__)
 def home():
     musicians = Musician.query.all()
     concerts = Concert.query.order_by(Concert.date.asc()).all()
+    modified_time = get_concerts_modified_time()
     
-    return render_template("home.jinja", user=current_user, musicians=musicians, concerts=concerts)
+    return render_template("home.jinja", user=current_user, musicians=musicians, concerts=concerts, modified_time=modified_time)
 
 
 @views.route("/concerts/<id>")

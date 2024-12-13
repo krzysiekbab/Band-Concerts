@@ -59,7 +59,7 @@ def add_musician_to_concert(musician: Musician, concert: Concert) -> None:
     """
     concert.musicians.append(musician)
     db.session.commit()
-    print(f"{musician.get_fullname} added to concert {concert.name}.")
+    print(f"{musician.get_fullname()} added to concert {concert.name}.")
 
 def remove_musician_from_concert(musician: Musician, concert: Concert) -> None:
     """
@@ -67,7 +67,7 @@ def remove_musician_from_concert(musician: Musician, concert: Concert) -> None:
     """
     concert.musicians.remove(musician)
     db.session.commit()
-    print(f"{musician.get_fullname} has been removed from the concert {concert.name}.")
+    print(f"{musician.get_fullname()} has been removed from the concert {concert.name}.")
 
 def is_musician_already_added_to_concert(musician: Musician, concert: Concert) -> bool:
     """
@@ -129,3 +129,23 @@ def load_concerts_data() -> Dict:
         concerts_data = json.load(file)
 
         return concerts_data
+    
+def get_concerts_modified_time():
+    """
+    Get the last modified time of a concerts.json.
+
+    Returns:
+        str: Last modified time in 'YYYY-MM-DD HH:MM:SS' format, or an error message.
+    """
+    concerts_file_path = os.path.join(get_project_base_path(), 'data', 'concerts.json')
+
+    try:
+        if os.path.exists(concerts_file_path):
+            modified_time = os.path.getmtime(concerts_file_path)
+            readable_time = datetime.fromtimestamp(modified_time).strftime('%Y-%m-%d %H:%M')
+            
+            return readable_time
+        else:
+            return f"The file {concerts_file_path} does not exist."
+    except Exception as e:
+        return f"An error occurred: {e}"

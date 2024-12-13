@@ -1,7 +1,12 @@
 {% extends "base.jinja" %}
 {% block title %}Home{% endblock %}
 {% block content%}
-    <h1 class="mb-4">Nadchodzące koncerty</h1>
+    <div class="row justify-content-between align-items-center mb-4">
+        <h1 class="col-12 col-md-12 col-lg-6 mb-0">Nadchodzące koncerty</h1>
+        <div class="col-12 col-md-12 col-lg-6 text-secondary text-lg-end">
+            Zaktualizowano: {{ modified_time }}
+        </div>
+    </div>
     {% for concert in concerts%}
         <div class="card mb-3 bg-light">
             <div class="card-body">
