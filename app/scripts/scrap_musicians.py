@@ -34,7 +34,6 @@ def scrap_musicians():
                 key = f"{row[1]} {row[2]}"
                 value = row[0]
                 data_dict[key] = value
-    # print(data_dict)
 
     # Initialize session
     with requests.Session() as session:
@@ -105,10 +104,10 @@ def scrap_musicians():
                     print(f"Error accessing {user_link}: {e}")
 
             print("\nGathering data finished.")
-            
+
             print("Checking maiden names...")
             users_data = handel_maiden_names(users_data)
-            print("Maiden names checked")
+            print("Maiden names checked.")
 
             # Save data into .json file
             with open(f"{data_base_path}/musicians.json", "w", encoding="utf-8") as file:
