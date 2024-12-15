@@ -6,6 +6,7 @@ import csv
 import json
 from app import database_exists
 from app.services.musician_service import update_musician_database
+from typing import Dict
 
 load_dotenv()
 
@@ -20,6 +21,7 @@ users_url = os.getenv("USERS_URL")
 # Load file paths for users data
 data_base_path = os.getenv("DATA_BASE_PATH")
 active_musicians_path = os.getenv("ACTIVE_MUSICIANS_PATH")
+maiden_names_path = os.getenv("MAIDEN_NAMES_PATH")
 
 def scrap_musicians():
     data_dict = {}
@@ -32,6 +34,7 @@ def scrap_musicians():
                 key = f"{row[1]} {row[2]}"
                 value = row[0]
                 data_dict[key] = value
+    # print(data_dict)
 
     # Initialize session
     with requests.Session() as session:
@@ -102,12 +105,27 @@ def scrap_musicians():
                     print(f"Error accessing {user_link}: {e}")
 
             print("\nGathering data finished.")
+            
+            print("Checking maiden names...")
+            users_data = handel_maiden_names(users_data)
+            print("Maiden names checked")
 
             # Save data into .json file
             with open(f"{data_base_path}/musicians.json", "w", encoding="utf-8") as file:
                 json.dump(users_data, file, indent=4, ensure_ascii=False)
         else:
             print("Login failed")
+
+def handel_maiden_names(users_data: Dict) -> Dict:
+        with open(maiden_names_path, mode='r', encoding='utf-8-sig') as file:
+            maiden_names: Dict = json.load(file)
+            for _, user_data in users_data.items():
+                for _, person_data in maiden_names.items():
+                    print(f"{user_data['name']} {user_data['surname']}")
+                    if user_data['name'] == person_data['name'] and user_data['surname'] == person_data['maiden_name']:
+                        user_data['surname'] = person_data['surname']
+
+        return users_data
 
 if __name__ == "__main__":
     scrap_musicians()
