@@ -3,7 +3,7 @@ from app.models import Musician
 from typing import List, Dict
 from flask import Flask
 import json
-from app import get_project_base_path
+from app import get_project_base_path, logger
 import os
 
 def add_musicians_to_database(app: Flask) -> None:
@@ -30,7 +30,7 @@ def add_musician_to_database(musician_data: Dict) -> None:
         db.session.add(musician)
         db.session.commit()
         
-        print(f"{musician.get_fullname()} added to database")
+        logger.info(f"{musician.get_fullname()} added to database")
 
 def remove_musician_from_database(musician: Musician) -> None:
     """
@@ -40,7 +40,7 @@ def remove_musician_from_database(musician: Musician) -> None:
     db.session.delete(musician)
     db.session.commit()
 
-    print(f"{full_name} removed from database")
+    logger.info(f"{full_name} removed from database")
 
 def update_musician_database() -> None:
     """

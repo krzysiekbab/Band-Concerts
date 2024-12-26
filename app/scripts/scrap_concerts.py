@@ -6,6 +6,7 @@ import re
 import json
 from app import database_exists
 from app.services.concert_service import update_concert_database
+from app import logger
 
 load_dotenv()
 
@@ -25,6 +26,7 @@ data_base_path = os.getenv("DATA_BASE_PATH")
 def scrap_concerts():
     # Initialize session
     with requests.Session() as session:
+        logger.info("Scraping concerts started...")
         # Get login page (may be needed for CSRF tokens)
         response = session.get(login_url)
         soup = BeautifulSoup(response.text, 'html.parser')
@@ -40,7 +42,7 @@ def scrap_concerts():
         # Login
         login_response = session.post(login_url, data=form_data)
         if login_response.status_code == 200:
-            print("Logged succesfully")
+            logger.info("Logged succesfully")
             # Move to page Propozycje koncertów
             concerts_response = session.get(concerts_url)
 
@@ -55,7 +57,7 @@ def scrap_concerts():
                     links[anchor.text.strip()] = base_url + anchor['href']
 
             number_of_concerts = len(links)
-            print(f"Found {number_of_concerts} upcoming concerts. Starting gathering info about each of them...")
+            logger.info(f"Found {number_of_concerts} upcoming concerts. Starting gathering info about each of them...")
             concert_data = {}
             
             # Iterate over each link and access the page
@@ -95,32 +97,32 @@ def scrap_concerts():
                                     }
                                     # Calculate and display progress
                                     progress = (index / number_of_concerts) * 100
-                                    print(f"Progress {progress:.2f}%, Gathered: {index}/{number_of_concerts} concerts", end='\r')
+                                    logger.info(f"Progress {progress:.2f}%, Gathered: {index}/{number_of_concerts} concerts")
                                 else:
-                                    print(f"Failed to access poll results page: {poll_link}, Status Code: {poll_response.status_code}")
+                                    logger.error(f"Failed to access poll results page: {poll_link}, Status Code: {poll_response.status_code}")
                             except requests.exceptions.RequestException as e:
-                                print(f"Error accessing poll results page: {poll_link}: {e}")
+                                logger.error(f"Error accessing poll results page: {poll_link}: {e}")
                         else:
-                            print(f"No poll results link found on page: {concert_url}")
+                            logger.error(f"No poll results link found on page: {concert_url}")
                     else:
-                        print(f"Failed to access {concert_name}: {concert_url}, Status Code: {response.status_code}")
+                        logger.error(f"Failed to access {concert_name}: {concert_url}, Status Code: {response.status_code}")
                 except requests.exceptions.RequestException as e:
-                    print(f"Error accessing {concert_url}: {e}")
+                    logger.error(f"Error accessing {concert_url}: {e}")
 
-            print("\nGathering data finished.")
+            logger.info("Gathering concert data finished.")
 
             # Save data into .json file
             with open(f"{data_base_path}/concerts.json", "w", encoding="utf-8") as file:
                 json.dump(concert_data, file, indent=4, ensure_ascii=False)
         else:
-            "Login failed"
+            logger.error("Login failed.")
 
 if __name__ == "__main__":
     scrap_concerts()
     if database_exists():
         update_concert_database()
     else:
-        print(f"Database file is missing! Cannot update database")
+        logger.error(f"Database file is missing! Cannot update database")
 
         
 

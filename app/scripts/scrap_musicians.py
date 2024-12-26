@@ -7,6 +7,7 @@ import json
 from app import database_exists
 from app.services.musician_service import update_musician_database
 from typing import Dict
+from app import logger
 
 load_dotenv()
 
@@ -37,6 +38,7 @@ def scrap_musicians():
 
     # Initialize session
     with requests.Session() as session:
+        logger.info("Scraping musicians started...")
         # Get login page (may be needed for CSRF tokens)
         response = session.get(login_url)
         soup = BeautifulSoup(response.text, 'html.parser')
@@ -53,7 +55,7 @@ def scrap_musicians():
         # TODO: Fix checks to use HTTP CODES
         login_response = session.post(login_url, data=form_data)
         if login_response.status_code == 200:
-            print("Logged succesfully")
+            logger.info("Logged succesfully")
 
             # Move to users page
             users_response = session.get(users_url)
@@ -63,7 +65,7 @@ def scrap_musicians():
             links = soup.find_all("a", href=True)
             user_links = [link['href'] for link in links if 'uid=' in link['href']]
 
-            print(f"Found {len(user_links)} users. Starting gathering info about each of them...")
+            logger.info(f"Found {len(user_links)} users. Starting gathering info about each of them...")
             users_data = {}
             
             # Iterate over each link and access the page
@@ -97,30 +99,29 @@ def scrap_musicians():
                                 'instrument': instrument
                             }
                         progress = (index + 1) / len(user_links) * 100
-                        print(f"Progress: {progress:.2f}% - Gathered {index + 1}/{len(user_links)} users", end='\r')
+                        logger.info(f"Progress: {progress:.2f}% - Gathered {index + 1}/{len(user_links)} users")
                     else:
-                        print(f"Failed to access {user_link}, Status Code: {user_response.status_code}")
+                        logger.error(f"Failed to access {user_link}, Status Code: {user_response.status_code}")
                 except requests.exceptions.RequestException as e:
-                    print(f"Error accessing {user_link}: {e}")
+                    logger.error(f"Error accessing {user_link}: {e}")
 
-            print("\nGathering data finished.")
-
-            print("Checking maiden names...")
+            logger.info("\nGathering musician data finished.")
+            logger.info("Checking maiden names...")
             users_data = handel_maiden_names(users_data)
-            print("Maiden names checked.")
+            logger.info("Maiden names checked.")
 
             # Save data into .json file
             with open(f"{data_base_path}/musicians.json", "w", encoding="utf-8") as file:
                 json.dump(users_data, file, indent=4, ensure_ascii=False)
         else:
-            print("Login failed")
+            logger.error("Login failed")
 
 def handel_maiden_names(users_data: Dict) -> Dict:
         with open(maiden_names_path, mode='r', encoding='utf-8-sig') as file:
             maiden_names: Dict = json.load(file)
             for _, user_data in users_data.items():
                 for _, person_data in maiden_names.items():
-                    print(f"{user_data['name']} {user_data['surname']}")
+                    logger.info(f"{user_data['name']} {user_data['surname']}")
                     if user_data['name'] == person_data['name'] and user_data['surname'] == person_data['maiden_name']:
                         user_data['surname'] = person_data['surname']
 
@@ -131,4 +132,4 @@ if __name__ == "__main__":
     if database_exists():
         update_musician_database()
     else:
-        print(f"Database file is missing! Cannot update database")
+        logger.error(f"Database file is missing! Cannot update database")

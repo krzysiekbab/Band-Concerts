@@ -4,7 +4,7 @@ from datetime import datetime
 import json
 from typing import List, Dict
 from flask import Flask
-from app import get_project_base_path
+from app import get_project_base_path, logger
 import os
 
 def add_concerts_to_database(app: Flask) -> None:
@@ -33,7 +33,7 @@ def add_concert_to_database(concert_data: Dict) -> None:
         db.session.add(concert)
         db.session.commit()
 
-        print(f"{concert_data['name']} added to database")
+        logger.info(f"{concert_data['name']} added to database")
 
 def remove_concert_from_database(concert: Concert) -> None:
     """
@@ -43,7 +43,7 @@ def remove_concert_from_database(concert: Concert) -> None:
     db.session.remove(concert)
     db.session.commit()
 
-    print(f"{concert_name} removed from database")
+    logger.info(f"{concert_name} removed from database")
 
 def add_musicians_to_concert(concert_data: Dict, concert: Concert) -> None:
     """
@@ -60,7 +60,7 @@ def add_musician_to_concert(musician: Musician, concert: Concert) -> None:
     """
     concert.musicians.append(musician)
     db.session.commit()
-    print(f"{musician.get_fullname()} added to concert {concert.name}.")
+    logger.info(f"{musician.get_fullname()} added to concert {concert.name}.")
 
 def remove_musician_from_concert(musician: Musician, concert: Concert) -> None:
     """
@@ -68,7 +68,7 @@ def remove_musician_from_concert(musician: Musician, concert: Concert) -> None:
     """
     concert.musicians.remove(musician)
     db.session.commit()
-    print(f"{musician.get_fullname()} has been removed from the concert {concert.name}.")
+    logger.info(f"{musician.get_fullname()} has been removed from the concert {concert.name}.")
 
 def is_musician_already_added_to_concert(musician: Musician, concert: Concert) -> bool:
     """

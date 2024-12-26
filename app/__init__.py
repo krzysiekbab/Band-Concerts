@@ -2,9 +2,11 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 import os
 from flask_login import LoginManager
+from app.logger import  setup_logger
 
 db = SQLAlchemy()
 DB_NAME = "database.db"
+logger = setup_logger()
 
 def create_app() -> Flask:
     app = Flask(__name__)
@@ -46,7 +48,7 @@ def create_database(app: Flask) -> None:
     if not database_exists():
         with app.app_context():
             db.create_all()
-        print('Created Database!')
+        logger.info('Created Database!')
 
 def database_exists() -> bool:
     """
@@ -56,6 +58,6 @@ def database_exists() -> bool:
 
 def get_project_base_path() -> str:
     return os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-            
+
 
     
