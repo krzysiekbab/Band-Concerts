@@ -124,6 +124,7 @@ def handel_maiden_names(users_data: Dict) -> Dict:
                     logger.info(f"{user_data['name']} {user_data['surname']}")
                     if user_data['name'] == person_data['name'] and user_data['surname'] == person_data['maiden_name']:
                         user_data['surname'] = person_data['surname']
+                        user_data['instrument'] = person_data['instrument']
 
         return users_data
 

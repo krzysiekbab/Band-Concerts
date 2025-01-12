@@ -40,9 +40,8 @@ def remove_concert_from_database(concert: Concert) -> None:
     Remove concert from database
     """
     concert_name = concert.name
-    db.session.remove(concert)
+    db.session.delete(concert)
     db.session.commit()
-
     logger.info(f"{concert_name} removed from database")
 
 def add_musicians_to_concert(concert_data: Dict, concert: Concert) -> None:
