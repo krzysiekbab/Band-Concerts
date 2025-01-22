@@ -1,5 +1,6 @@
 import logging
 from logging.handlers import RotatingFileHandler
+import os
 
 def setup_logger():
     """
@@ -9,11 +10,12 @@ def setup_logger():
     logger.setLevel(logging.DEBUG)
 
     c_handler = logging.StreamHandler()
-    f_handler = RotatingFileHandler('concert-app.log', maxBytes=1_000_000, backupCount=5)
+    log_file = 'concert-app.log'
+    f_handler = RotatingFileHandler(log_file, maxBytes=1_000_000, backupCount=5)
     c_handler.setLevel(logging.INFO)
     f_handler.setLevel(logging.DEBUG)
 
-    # Create formatters and add it to handlers
+    # Create formatters and add it to handlersdhjasdgsaj
     log_format = '%(asctime)s - %(levelname)s - %(message)s'
     date_format = '%Y-%m-%d %H:%M:%S'
     formatter = logging.Formatter(log_format, datefmt=date_format)
@@ -24,5 +26,10 @@ def setup_logger():
     # Add handlers to the logger
     logger.addHandler(c_handler)
     logger.addHandler(f_handler)
+
+    if not os.path.exists(log_file):
+        with open(log_file, 'w'):
+            pass
+    os.chmod(log_file, 0o666)
 
     return logger

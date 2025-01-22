@@ -33,8 +33,8 @@ Description=Gunicorn instance to serve Concert-App
 After=network.target
 
 [Service]
-User=www-data
-Group=www-data
+User=<your_user>>
+Group=<your_group>
 WorkingDirectory=/var/www/Concert-App
 Environment="PATH=/var/www/Concert-App/venv/bin"
 ExecStart=/var/www/Concert-App/venv/bin/gunicorn --workers 3 --bind unix:/var/www/Concert-App/concert_app.sock run:app
